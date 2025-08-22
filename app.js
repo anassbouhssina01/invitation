@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const searchInput = document.getElementById('search-input');
     const searchCityInput = document.getElementById('search-city');
-    const searchPprInput = document.getElementById('search-ppr');
     const searchResults = document.getElementById('search-results');
     
     const invitedListDiv = document.getElementById('invited-list');
@@ -78,10 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function performSearch() {
         const searchTerm = searchInput.value.toLowerCase().trim();
         const cityTerm = searchCityInput.value.toLowerCase().trim();
-        const pprTerm = searchPprInput.value.toLowerCase().trim();
         searchResults.innerHTML = '';
 
-        if (searchTerm.length === 0 && cityTerm.length === 0 && pprTerm.length === 0) {
+        if (searchTerm.length === 0 && cityTerm.length === 0) {
             return;
         }
 
@@ -89,13 +87,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const empName = (emp.fullName || '').toLowerCase();
             const empId = (emp.employeeId || '').toString();
             const empCity = (emp.city || '').toLowerCase();
-            const empPpr = (emp.workLocation || '').toLowerCase();
+            const postResponsibility = (emp.postResponsibility || '').trim();
 
             const nameMatch = searchTerm ? (empName.includes(searchTerm) || empId.includes(searchTerm)) : true;
             const cityMatch = cityTerm ? empCity.includes(cityTerm) : true;
-            const pprMatch = pprTerm ? empPpr.includes(pprTerm) : true;
 
-            return nameMatch && cityMatch && pprMatch;
+            // If searching by city, also filter for "responsible people".
+            const responsibleMatch = cityTerm 
+                ? (postResponsibility.includes("رئيس") || postResponsibility.includes("رئيسة") || postResponsibility.includes("وكيل") || postResponsibility.includes("وكيلة"))
+                : true;
+
+            return nameMatch && cityMatch && responsibleMatch;
         });
 
         displaySearchResults(filteredEmployees);
@@ -103,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('keyup', performSearch);
     searchCityInput.addEventListener('keyup', performSearch);
-    searchPprInput.addEventListener('keyup', performSearch);
 
     function displaySearchResults(employees) {
         searchResults.innerHTML = '';
@@ -155,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Clear search inputs and results
             searchInput.value = '';
             searchCityInput.value = '';
-            searchPprInput.value = '';
             searchResults.innerHTML = '';
         } else if (!employeeToAdd) {
              alert('لم يتم العثور على الموظف.');
